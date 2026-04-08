@@ -5,285 +5,205 @@ description: Use when starting a new feature, project, or significant code chang
 
 # Clarify — Adaptive Interview for Code Planning
 
-Interview the developer with binary questions to extract architectural decisions. Each question eliminates a branch of the decision tree. Output: a concrete PLAN.md with files, changes, dependencies, and implementation order.
+EXECUTE THIS PROTOCOL EXACTLY. Do not summarize, do not present tables of options, do not offer defaults. Follow each phase in order.
 
-**Method:** Adaptive clinical interview. Not Socratic, not brainstorming. Modeled on differential diagnosis — each question must narrow the solution space.
+## MANDATORY RULES — VIOLATION OF ANY RULE MEANS YOU ARE DOING IT WRONG
 
-## IMPORTANT: Execution Rules
-
-- Ask questions via `AskUserQuestion` — never assume answers
-- Binary questions only. Decompose "A or B?" into two binary questions
-- If a fact is derivable from the codebase or memory, confirm it — don't ask
-- Every question must eliminate at least one decision branch. If it wouldn't change the plan, don't ask it
-- Accept free-text answers — if the user writes more than y/n, incorporate the information
-- The user can say "enough" at any batch boundary to skip to synthesis
+1. **BINARY QUESTIONS ONLY.** Every question has exactly one answer: yes or no. NEVER present multiple-choice options. NEVER present tables of alternatives. Decompose "A or B?" into TWO separate binary questions: "Is it A?" then "Is it B?"
+2. **USE AskUserQuestion TOOL.** Every question batch MUST be delivered via the `AskUserQuestion` tool. Do NOT print questions as regular text output and wait. You MUST call the tool.
+3. **BATCHES OF UP TO 5.** Present at most 5 questions per AskUserQuestion call. Never dump all questions at once.
+4. **NO ASSUMPTIONS.** Do not assume answers. Do not offer "default plans." Do not say "if you want to skip questions." The entire point is to ASK.
+5. **NO TABLES OF OPTIONS.** Do not present comparison tables. Do not list pros/cons of approaches. Ask binary questions instead.
+6. **ONE PHASE AT A TIME.** Complete each phase fully before moving to the next. Do not skip phases.
+7. **WAIT FOR ANSWERS.** After each AskUserQuestion call, STOP. Do not continue until the user responds.
 
 ---
 
 ## Phase 1: SCAN
 
-Gather context before asking anything. Read these in order (skip missing files silently):
+Gather context SILENTLY. Do not show the user what you're reading. Just read these files (skip missing ones):
 
-1. `PLAN.md` in project root — if exists, this is a re-run. Load previous decisions as defaults.
-2. `.clarify/` directory — check for prior sessions. If found with same project, offer to resume.
-3. `CLAUDE.local.md` — check for stored decisions from prior clarify sessions.
-4. `CLAUDE.md` / `AGENTS.md` — project conventions and constraints.
+1. `PLAN.md` in project root
+2. `.clarify/` directory for prior sessions
+3. `CLAUDE.local.md` for stored decisions
+4. `CLAUDE.md` / `AGENTS.md` for project conventions
 
-Then scan the codebase:
+Then scan the codebase structure:
+- If small project (<50 files): read directory listing directly
+- If large project: use `Explore` subagent to summarize tech stack, frameworks, file count, test framework, auth, database, deployment target
 
-- Use the `Explore` subagent type (or read files directly if project is small):
-  ```
-  Summarize this project: tech stack, frameworks, languages, file count, directory structure,
-  test framework, auth mechanism, database, deployment target. Be concise — bullet points only.
-  ```
-- If project is empty (no source files), note this — questions will be broader.
-
-**Session Resumption:** If `.clarify/sessions/` contains a session file for this project:
+If `.clarify/sessions/` has a prior session for this project, use AskUserQuestion:
 ```
-Found interrupted session from {date}: "{original_request}"
-Resume where you left off? [Y/n]
+question: "Found interrupted session from {date}: '{original_request}'. Resume?"
+options: ["Yes, resume", "No, start fresh"]
 ```
-If yes, load all prior answers and continue from the last unanswered question. Skip to Phase 3.
 
-Store all discovered facts as a structured list for Phase 2.
+Store all discovered facts internally. Move to Phase 2.
 
 ---
 
 ## Phase 2: PREFILL
 
-Present derived facts for confirmation. Do NOT ask questions the codebase already answers.
+If the project is empty (no source files), SKIP this phase entirely. Go to Phase 3.
 
-Format:
+If there IS a codebase, present discovered facts and confirm via AskUserQuestion:
+
 ```
-Based on your project:
-  1. Stack: {languages, frameworks}
-  2. Database: {type or "none detected"}
-  3. Auth: {mechanism or "none detected"}
-  4. Testing: {framework or "none detected"}
-  5. Deployment: {target or "unknown"}
-  6. Size: {file count} files, ~{LOC} lines of code
-
-All correct? [Y/n]
+question: "Based on your project:\n1. Stack: {X}\n2. Database: {X}\n3. Auth: {X}\n4. Testing: {X}\n5. Size: {N} files\n\nAll correct?"
+options: ["All correct", "Some corrections needed"]
 ```
 
-Use `AskUserQuestion` with options: "All correct", "Some corrections needed".
+If corrections needed, ask which items via another AskUserQuestion call.
 
-If corrections needed, ask: "Which items need correction? (enter numbers, e.g., 2,4)"
-Then ask for the correct value for each flagged item.
-
-If project is empty, skip PREFILL entirely — there's nothing to confirm.
+Move to Phase 3.
 
 ---
 
 ## Phase 3: INTERVIEW
 
-This is the core phase. Generate and ask adaptive binary questions in batches.
+This is the core. You will ask binary questions in batches using AskUserQuestion.
 
-### Step 3.1: Determine Depth
+### Step 3.1: Depth
 
-Auto-estimate from request complexity:
+Estimate depth from request complexity, then confirm via AskUserQuestion:
 
-| Signal | Suggested Depth |
-|--------|----------------|
-| Request names specific files or functions | compact (~5 questions) |
-| Request describes a single feature | standard (~15 questions) |
-| Request describes a new project or major architecture change | thorough (30+ questions) |
-| Request is vague or open-ended | standard, then adjust |
-
-Present the suggestion:
 ```
-Estimated complexity: {standard}. Interview depth: ~{15} questions.
-Override? [compact / standard / thorough / accept]
+question: "Interview depth for '{request}': ~{N} questions. Change?"
+options: ["Compact (~5)", "Standard (~15)", "Thorough (30+)", "Accept suggested"]
 ```
+
+This is the ONE exception where options are allowed — it's a depth setting, not a design question.
 
 ### Step 3.2: Load Question Taxonomy
 
-Read `references/question-axes.md` from this skill's directory. This provides 10+ question axes with seed questions at each depth level.
+Read `references/question-axes.md` from this skill's directory. Select questions from axes by priority.
 
-### Step 3.3: Run Interview Loop
+### Step 3.3: Interview Loop
 
-**For each batch (5 questions per batch):**
+REPEAT until depth target reached or user says "enough":
 
-1. **Select questions:** Pick the 5 most relevant unasked questions across axes, prioritizing:
-   - Higher-priority axes first (Scope > Data > Auth > ...)
-   - Questions whose answers would eliminate the most branches
-   - Axes flagged for deeper exploration by previous answers
-   - Skip questions whose answers are already known from PREFILL
+1. **Select up to 5 binary questions** from the highest-priority unasked axes.
 
-2. **Present batch:** Use `AskUserQuestion` with this format:
+2. **Call AskUserQuestion with this EXACT format:**
    ```
-   [{current}/{~total}] Questions:
+   question: "[{answered}/{~total}]\n\n1. [scope] Does this change cross multiple modules?\n2. [data] Does this need persistent storage?\n3. [auth] Does this require authentication?\n4. [api] Does this expose an API?\n5. [testing] Are tests required?\n\nAnswer with: y n y y n (or 1:y 2:n etc)"
+   ```
+   Do NOT use the `options` parameter for question batches. The user types freeform answers like "y n y y n".
 
-   1. [scope] Does this change cross multiple modules? [y/n]
-   2. [data] Does this need persistent storage? [y/n]
-   3. [auth] Does this require authentication? [y/n]
-   4. [api] Does this expose an API? [y/n]
-   5. [testing] Are tests required? [y/n]
+3. **STOP and wait for the user's response.** Do not proceed until you have answers.
 
-   Answer: (e.g., "y n y y n" or "1:y 2:n 3:y 4:y 5:n")
+4. **Parse the response.** Accept:
+   - `y n y y n` — space-separated, matches question order
+   - `1:y 2:n 3:y 4:y 5:n` — numbered
+   - `yes no yes yes no` — words
+   - Free text — extract intent, ask about unclear items
+
+5. **After parsing, check for contradictions** against all previous answers. Load `references/contradiction-rules.md` if needed. If contradiction found, present it via AskUserQuestion:
+   ```
+   question: "Contradiction:\n  [{id}] '{question_a}' = yes\n  [{id}] '{question_b}' = yes\n\n{explanation}. Which is correct?"
+   options: ["Keep #{a}", "Keep #{b}", "Let me explain"]
    ```
 
-3. **Parse responses:** Accept these formats:
-   - Shorthand: `y n y y n` (space-separated, matches question order)
-   - Numbered: `1:y 2:n 3:yes 4:no 5:y`
-   - Natural language: parse intent from free text
-   - Partial: if only some answered, ask about the rest
+6. **Adapt the next batch:** If an answer eliminates an axis, remove its questions. If an answer reveals complexity, add deeper questions for that axis.
 
-4. **After each batch:**
-   - Check for contradictions: load `references/contradiction-rules.md` and cross-reference all answers so far
-   - If contradiction found: present it immediately, ask user to resolve before continuing
-   - Evaluate which axes need deeper exploration based on answers
-   - Update progress estimate (total may change as axes open/close)
-   - If depth target reached, move to Phase 4
+7. **Go to step 1** for the next batch.
 
-5. **Adaptive adjustments:**
-   - If an answer reveals unexpected complexity → add deeper questions for that axis
-   - If an answer eliminates an entire axis → remove its remaining questions from the queue
-   - If user provides free-text instead of y/n → extract all facts from the text, skip questions already answered by it
+### Step 3.4: Safety Valves
 
-### Step 3.4: Safety Checks
-
-**All-yes pattern (>80% yes):**
+**All-yes (>80%):** After the batch where this is detected, use AskUserQuestion:
 ```
-You've said yes to most questions — this is shaping up to be a large scope.
-Let me re-confirm the 2 highest-impact decisions:
+question: "You've said yes to most questions — large scope. Let me re-confirm the 2 biggest:\n\n1. {highest_impact_question}?\n2. {second_highest_impact_question}?\n\nStill yes to both?"
+options: ["Yes to both", "Let me reconsider"]
 ```
-Then re-ask the 2 questions with the largest plan impact.
 
-**All-no pattern (>80% no):**
+**All-no (>80%):** Use AskUserQuestion:
 ```
-Most answers are "no" — I may be asking the wrong questions.
-In a sentence or two, what does this feature actually need?
+question: "Most answers are no — I may be asking wrong questions. In a sentence, what does this feature actually need?"
 ```
-Incorporate the free-text answer and restart question selection.
 
-**"Enough" command:** If user says "enough", "stop", "that's enough", or similar at any point → immediately move to Phase 4 with answers collected so far.
+**"Enough" / "stop":** Immediately move to Phase 4 with answers collected so far.
 
 ---
 
 ## Phase 4: SYNTHESIZE
 
-Generate the PLAN.md.
+Generate PLAN.md. Do this SILENTLY — no commentary, just write the file.
 
-1. Read `references/plan-template.md` from this skill's directory for the output format.
-
-2. Run a **final contradiction check** across all answers before writing.
-
-3. Fill the template:
-   - **Summary:** Synthesize from all answers — what's being built, key approach, why
-   - **Decisions table:** All questions and answers, in order asked
-   - **Files:** Predict specific file paths using the project's actual structure from SCAN
-   - **Implementation order:** Logical phases based on dependency order
-   - **Non-functional requirements:** Extracted from relevant answers (rate limiting, accessibility, performance budgets)
-   - **Open questions:** Anything unresolved or deferred
-
-4. **Handle existing PLAN.md:**
-   - If PLAN.md exists in project root, ask: "Overwrite existing PLAN.md or create PLAN-2.md?"
-   - Use `AskUserQuestion` with those two options
-
-5. Write PLAN.md to project root using the Write tool.
+1. Read `references/plan-template.md` from this skill's directory.
+2. Run final contradiction check across all answers.
+3. Fill every section of the template using collected answers and codebase context from SCAN.
+4. If PLAN.md already exists, use AskUserQuestion:
+   ```
+   question: "PLAN.md already exists. Overwrite or create PLAN-2.md?"
+   options: ["Overwrite", "Create PLAN-2.md"]
+   ```
+5. Write the file using the Write tool.
 
 ---
 
 ## Phase 5: PERSIST
 
-Save session data for future reference and resumption.
-
 ### 5.1: Session File
 
-Create `.clarify/sessions/` directory if needed. Write session JSON:
+Create `.clarify/sessions/` directory. Write `{YYYY-MM-DD-HHmmss}.json`:
 
 ```json
 {
-  "request": "{original user request}",
+  "request": "{original request}",
   "timestamp": "{ISO 8601}",
   "depth": "{compact|standard|thorough}",
-  "total_questions": {N},
-  "total_batches": {N},
-  "codebase_summary": "{from SCAN phase}",
-  "prefill": {
-    "facts": ["{list of confirmed facts}"],
-    "corrections": ["{any corrections made}"]
-  },
+  "total_questions": 0,
+  "total_batches": 0,
+  "codebase_summary": "{from SCAN}",
+  "prefill": { "facts": [], "corrections": [] },
   "questions": [
-    {
-      "id": 1,
-      "batch": 1,
-      "axis": "{axis name}",
-      "text": "{question text}",
-      "answer": "{yes|no|free-text value}",
-      "source": "{user|prefill_confirmed|derived}"
-    }
+    { "id": 1, "batch": 1, "axis": "", "text": "", "answer": "", "source": "user" }
   ],
-  "contradictions": [
-    {
-      "question_a": {id},
-      "question_b": {id},
-      "severity": "{hard|tension}",
-      "resolution": "{which answer was kept or explanation}"
-    }
-  ],
+  "contradictions": [],
   "plan_file": "PLAN.md"
 }
 ```
 
-Filename: `{YYYY-MM-DD-HHmmss}.json`
+### 5.2: CLAUDE.local.md
 
-### 5.2: CLAUDE.local.md Update
-
-Append to `CLAUDE.local.md` (create if not exists):
+Append key decisions:
 
 ```markdown
 ## clarify decisions ({YYYY-MM-DD})
-- Task: {short title from PLAN.md}
+- Task: {short title}
 - Plan: see PLAN.md
 - Key decisions:
-  - {decision 1}: {value}
-  - {decision 2}: {value}
-  - {decision 3}: {value}
-  - {decision 4}: {value}
-  - {decision 5}: {value}
+  - {top 5 most impactful decisions, one line each}
 ```
 
-Only include the 5 most architecturally significant decisions (ones that would change the most files if reversed).
+### 5.3: Gitignore
 
-### 5.3: Gitignore Suggestion
-
-If `.clarify/` is not in `.gitignore`, suggest (do not modify without asking):
+If `.clarify/` not in `.gitignore`, use AskUserQuestion:
 ```
-Suggest adding .clarify/ to .gitignore — it contains local session data. Add it? [y/N]
+question: "Add .clarify/ to .gitignore? (contains local session data)"
+options: ["Yes", "No"]
 ```
 
 ---
 
 ## Phase 6: OFFER
 
-Present completion and next steps:
-
+Use AskUserQuestion:
 ```
-PLAN.md written ({N} decisions, {files_count} files planned).
-
-Start execution? [y/N]
+question: "PLAN.md written ({N} decisions, {M} files planned). Start execution?"
+options: ["Yes, start building", "No, I'll review first"]
 ```
 
-Default: no.
-
-If yes:
-- If `superpowers:writing-plans` or `superpowers:executing-plans` skills are available, suggest using them
-- If `superpowers:using-git-worktrees` is available, suggest creating an isolated worktree
-- Otherwise, suggest the user review PLAN.md first and then ask Claude to implement it
-
-If no:
-- End the session. The PLAN.md is ready for when they want to proceed.
+If yes: suggest using execution skills if available (superpowers:executing-plans, superpowers:using-git-worktrees).
+If no: end session.
 
 ---
 
-## Language Handling
+## Language
 
-- Detect the user's language from their initial request
-- Conduct the interview in the user's language
-- ALL generated files (PLAN.md, session JSON, CLAUDE.local.md entries) remain in **English** regardless of conversation language
-- Question axis labels (`[scope]`, `[data]`, etc.) always in English
+- Detect user's language from input. Conduct interview in that language.
+- ALL files (PLAN.md, JSON, CLAUDE.local.md) stay in English.
+- Axis labels always English.
 
 ---
 
@@ -291,8 +211,8 @@ If no:
 
 | Situation | Action |
 |-----------|--------|
-| Empty/vague request (no $ARGUMENTS and no context) | Ask: "Describe in one sentence what you want to build" before starting |
-| Codebase too large for full scan | Scan top-level structure only, note limitation in PLAN.md |
-| PLAN.md write fails | Output plan content directly to the conversation as fallback |
-| User abandons mid-interview | Save partial session to `.clarify/sessions/` with `"complete": false` |
-| Prior session exists but request is different | Ask: "Found prior session for '{old_request}'. Start fresh? [Y/n]" |
+| No request provided | AskUserQuestion: "What do you want to build? (one sentence)" |
+| Codebase too large | Scan top-level only, note in PLAN.md |
+| Write fails | Output PLAN.md content as text |
+| User abandons | Save partial session with `"complete": false` |
+| Prior session, different request | AskUserQuestion: "Found prior session for '{X}'. Start fresh?" |
