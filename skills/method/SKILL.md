@@ -77,7 +77,7 @@ Move to Phase 3.
 
 ## Phase 3: INTERVIEW
 
-One question at a time. Adaptive — each answer shapes the next question.
+One question at a time. **After every answer, re-assess the full picture before asking the next question.** This is the core of the clinical method — not a script, a diagnosis.
 
 ### Step 3.1: Depth
 
@@ -95,38 +95,44 @@ If Yes → compact. If No → thorough (30+).
 
 ### Step 3.2: Load Taxonomy
 
-Read `references/question-axes.md`. Use it to select questions from axes by priority.
+Read `references/question-axes.md`. Use it as a reference, not a script.
 
-### Step 3.3: Interview Loop
+### Step 3.3: Interview Loop — The Clinical Method
+
+The loop has TWO mandatory steps per cycle: ASK, then RE-ASSESS. Never skip re-assessment.
 
 Start a counter at 1. REPEAT until depth target reached or user says "enough":
 
-1. **Pick the single most important unasked question.** Prioritize:
-   - Higher-priority axes first (Scope > Data > Auth > API > ...)
-   - Questions that eliminate the most branches
-   - Questions unlocked by previous answers
-   - Skip anything derivable from PREFILL
+#### A. ASK — one question
 
-2. **Ask it:**
-   ```
-   question: "[{N}/{~total}] {question}?"
-   options: ["Yes", "No"]
-   ```
+Pick the single most diagnostic question right now. "Most diagnostic" = the one whose answer would change the plan the most. Use the taxonomy axes as inspiration, but do NOT follow them linearly. After re-assessment, the most important question might jump to a completely different axis.
 
-3. **STOP. Wait for response.**
+```
+question: "[{N}/{~total}] {question}?"
+options: ["Yes", "No"]
+```
 
-4. **Process the answer:**
-   - If "Yes" or "No" → record and continue
-   - If free text → extract all facts, skip questions already answered by it, acknowledge: "Got it — that also answers {X}. Moving on."
-   - Increment counter
+**STOP. Wait for response.**
 
-5. **After each answer, check for contradictions** against all previous answers. If contradiction found:
+#### B. RE-ASSESS — update the full picture
+
+This is the critical step. After EVERY answer, before picking the next question, you MUST:
+
+1. **Record** the answer.
+2. **Update your mental model** of what's being built. What do you now know? What hypotheses are eliminated? What's the current shape of the solution?
+3. **Check for contradictions** against ALL previous answers. If found:
    ```
    question: "Conflict: you said '{A}' but also '{B}'. Keep which?"
    options: ["Keep first", "Keep second"]
    ```
+4. **Eliminate branches.** Which axes or questions are now irrelevant? Remove them. Reduce the total estimate.
+5. **Unlock branches.** Did the answer reveal new complexity? Add deeper questions. Increase the total estimate.
+6. **Recalculate priority.** What is now the MOST informative question to ask? It may be on a completely different axis than the last one.
+7. **If free text was given** instead of Yes/No: extract all facts from it. Mark any questions it implicitly answered. Acknowledge briefly: "Got it — that covers {X} too."
 
-6. **Adapt:** If answer eliminates an axis, remove its questions and reduce total estimate. If answer reveals complexity, add deeper questions and increase estimate.
+Only AFTER completing re-assessment → go back to step A.
+
+The total estimate (`~N`) is a living number. It should change as branches open and close. Show the updated estimate in every question's progress counter.
 
 7. **Go to step 1.**
 
