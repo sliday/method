@@ -66,6 +66,12 @@ REPEAT:
 
 **5a.** Pick the ONE most diagnostic yes/no question. "Most diagnostic" = the one whose answer eliminates the most uncertainty.
 
+**OPEN-ENDED CHECK:** Every 4-5 binary questions, insert ONE open-ended question to widen the picture. This catches things binary questions miss. Use AskUserQuestion WITHOUT options (freeform text):
+```
+AskUserQuestion(question: "[{counter}/~{remaining}] What else should I know about {current_axis_or_topic}?")
+```
+If user says "nothing" or similar, continue with binary questions. If they provide info, extract facts, skip questions already answered, show: `Got it — covers {N} questions. ~{remaining} remaining.`
+
 **5b.** Print a brief context line (1-2 sentences) explaining what this question means and why it matters. For example:
 ```
 Menu bar apps stay visible as a small icon. Regular windows are resizable and appear in the Dock.
@@ -99,6 +105,14 @@ AskUserQuestion(question: "Conflict: '{A}' vs '{B}'. Keep which?", options: ["Ke
 **5g.** Increment counter. Update remaining. Go to 5a.
 
 EXIT LOOP when: counter >= depth target, or user says "enough"/"stop".
+
+### STEP 5.5: FINAL CHECK (mandatory, never skip)
+
+Always ask this before moving to synthesis, even if depth target is reached:
+```
+AskUserQuestion(question: "Anything missing? Anything I should have asked but didn't?")
+```
+No options — freeform text. If user says "no"/"nothing", proceed. If they provide info, incorporate it and ask follow-up binary questions if needed.
 
 ### STEP 6: SYNTHESIZE
 
