@@ -78,4 +78,4 @@ Sessions saved to `.plea/sessions/<timestamp>.json`. Contains all questions, ans
 
 ## Credits
 
-Concept: [Azamat Sultanov](https://github.com/azamat) & [Stas Kulesh](https://github.com/sliday)
+Concept: [Azamat Sultanov](https://github.com/sultanovazamat) & [Stas Kulesh](https://github.com/sliday)
