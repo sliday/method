@@ -1,6 +1,6 @@
 ---
-name: method
-description: Use when starting a new feature, project, or significant code change and requirements are unclear. Runs an adaptive binary-question interview before any code is written, then outputs a concrete PLAN.md. Triggers on /method, "clarify requirements", "help me plan", "what should I build", "before we start coding", or when the user's request is ambiguous and would benefit from structured requirements gathering.
+name: plea
+description: Use when starting a new feature, project, or significant code change and requirements are unclear. Runs an adaptive binary-question interview before any code is written, then outputs a concrete PLAN.md. Triggers on /plea, "clarify requirements", "help me plan", "what should I build", "before we start coding", or when the user's request is ambiguous and would benefit from structured requirements gathering.
 ---
 
 # Method — Adaptive Interview for Code Planning
@@ -195,7 +195,7 @@ Create `.clarify/sessions/{YYYY-MM-DD-HHmmss}.json`:
 
 Append:
 ```markdown
-## method decisions ({YYYY-MM-DD})
+## plea decisions ({YYYY-MM-DD})
 - Task: {title}
 - Plan: see PLAN.md
 - Key decisions: {top 5, one line each}

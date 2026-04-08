@@ -1,12 +1,12 @@
 {
-  "name": "method",
+  "name": "plea",
   "version": "0.5.0",
   "description": "Adaptive clinical interview — binary yes/no questions before coding, outputs PLAN.md. Differential diagnosis for software requirements.",
   "author": {
     "name": "Stas Kulesh",
     "email": "stas@sliday.com"
   },
-  "repository": "https://github.com/sliday/method",
+  "repository": "https://github.com/sliday/plea",
   "license": "MIT",
-  "keywords": ["interview", "planning", "requirements", "method", "PLAN.md", "differential-diagnosis", "adaptive-clinical-interview", "binary-questions", "TRIZ", "Kepner-Tregoe", "decision-tree", "contradiction-detection", "requirements-gathering", "clarify"]
+  "keywords": ["interview", "planning", "requirements", "plea", "PLAN.md", "differential-diagnosis", "adaptive-clinical-interview", "binary-questions", "TRIZ", "Kepner-Tregoe", "decision-tree", "contradiction-detection", "requirements-gathering", "clarify"]
 }

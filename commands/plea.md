@@ -3,7 +3,7 @@ description: Run an adaptive binary-question interview to clarify requirements b
 argument-hint: <describe what you want to build>
 ---
 
-Invoke the @method:method skill and follow it exactly as presented to you.
+Invoke the @plea:plea skill and follow it exactly as presented to you.
 
 The user's request is: $ARGUMENTS
 

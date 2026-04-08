@@ -1,25 +1,27 @@
-# method
+# plea
 
 Adaptive clinical interview plugin for Claude Code. One yes/no question at a time, re-assess after every answer, output a concrete `PLAN.md`.
 
 Modeled on differential diagnosis — each question eliminates a branch of the decision tree. Not a script, a diagnosis.
 
+**Website:** [plea.dev](https://plea.dev)
+
 ## Install
 
 ```bash
-claude plugins install method@sliday
+claude plugins install plea@sliday
 ```
 
 ## Usage
 
 ```
-/method:method I need a REST API for user management
+/plea:plea I need a REST API for user management
 ```
 
 Or with no arguments (will prompt):
 
 ```
-/method:method
+/plea:plea
 ```
 
 ## How It Works
