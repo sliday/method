@@ -66,32 +66,37 @@ REPEAT:
 
 **5a.** Pick the ONE most diagnostic yes/no question. "Most diagnostic" = the one whose answer eliminates the most uncertainty.
 
-**5b.** Call AskUserQuestion. EXACTLY this format. NO MODIFICATIONS:
+**5b.** Print a brief context line (1-2 sentences) explaining what this question means and why it matters. For example:
+```
+Menu bar apps stay visible as a small icon. Regular windows are resizable and appear in the Dock.
+```
+This context helps the user make an informed yes/no decision. Keep it factual, not persuasive. No recommendations.
+
+**5c.** Immediately after the context line, call AskUserQuestion. EXACTLY this format. NO MODIFICATIONS:
 ```
 AskUserQuestion(question: "[{counter}/~{remaining}] {yes/no question}?", options: ["Yes", "No"])
 ```
 
-IMPORTANT CONSTRAINTS ON 5b:
+IMPORTANT CONSTRAINTS ON 5c:
 - options MUST be ["Yes", "No"] — never anything else
 - question MUST be answerable with yes or no
 - question MUST NOT contain "or" offering alternatives
 - question MUST NOT have descriptions, recommendations, or context in parentheses
 - DO NOT add numbered lists, categories, steppers, or navigation UI
-- DO NOT print the question as text — use the tool
 
-**5c.** STOP. Wait for response. Do NOT continue until user responds.
+**5d.** STOP. Wait for response. Do NOT continue until user responds.
 
-**5d.** After response, print delta (one line, not a tool call):
+**5e.** After response, print delta (one line, not a tool call):
 - If branches eliminated: `{N} skipped ({brief reason}) · ~{new_remaining} remaining`
 - If branches added: `+{N} unlocked ({brief reason}) · ~{new_remaining} remaining`
 - If unchanged: `~{remaining} remaining`
 
-**5e.** Check contradictions against all previous answers. If found:
+**5f.** Check contradictions against all previous answers. If found:
 ```
 AskUserQuestion(question: "Conflict: '{A}' vs '{B}'. Keep which?", options: ["Keep first", "Keep second"])
 ```
 
-**5f.** Increment counter. Update remaining. Go to 5a.
+**5g.** Increment counter. Update remaining. Go to 5a.
 
 EXIT LOOP when: counter >= depth target, or user says "enough"/"stop".
 
