@@ -1,10 +1,9 @@
 ---
 description: "Run an adaptive binary-question interview to clarify requirements before coding, then generate PLAN.md. Use when starting new features, projects, or significant changes."
 argument-hint: "[describe what you want to build]"
-disable-model-invocation: true
 ---
 
-Invoke the @clarify:clarify skill and follow it exactly as presented to you.
+Invoke the @method:method skill and follow it exactly as presented to you.
 
 The user's request is: $ARGUMENTS
 
