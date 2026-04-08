@@ -295,6 +295,14 @@
       height: auto;
     }
 
+    .mermaid-desktop { display: none; }
+    .mermaid-mobile { display: block; }
+
+    @media (min-width: 768px) {
+      .mermaid-desktop { display: block; }
+      .mermaid-mobile { display: none; }
+    }
+
     /* Terminal session */
     .terminal {
       background: var(--color-surface);
@@ -494,7 +502,7 @@
     <h1>Diagnose before you build.</h1>
     <p>A Claude Code plugin that uses medical diagnosis methods to extract requirements through yes/no questions. One question at a time, re-assess after every answer, output a concrete PLAN.md.</p>
     <div class="install-block" onclick="copyCmd(this,'claude plugins add-marketplace sliday/claude-plugins && claude plugins install plea@sliday')" onkeydown="if(event.key==='Enter')copyCmd(this,'claude plugins add-marketplace sliday/claude-plugins && claude plugins install plea@sliday')" role="button" tabindex="0" aria-label="Copy install command">
-      claude plugins add-marketplace sliday/claude-plugins && claude plugins install plea@sliday
+      claude plugins add-marketplace sliday/claude-plugins &&<br>claude plugins install plea@sliday
       <span class="copy-hint">click to copy</span>
     </div>
     <a href="https://github.com/sliday/plea" class="github-stars" aria-label="Star plea on GitHub">
@@ -545,16 +553,27 @@
     <section>
       <h2>How it works</h2>
       <p>Six phases. Each one builds on the last. The interview loop is the core.</p>
-      <div class="mermaid" role="img" aria-label="Flowchart showing the six phases: SCAN, PREFILL, INTERVIEW with RE-ASSESS loop, SYNTHESIZE, PERSIST, OFFER">
+      <div class="mermaid mermaid-desktop" role="img" aria-label="Flowchart showing the six phases: SCAN, PREFILL, INTERVIEW with RE-ASSESS loop, SYNTHESIZE, PERSIST, OFFER">
+flowchart LR
+    A["Vague Request"] --> B["SCAN"]
+    B --> C["PREFILL"]
+    C --> D["INTERVIEW"]
+    D --> E{"RE-ASSESS"}
+    E -->|"More"| D
+    E -->|"Done"| F["SYNTHESIZE"]
+    F --> G["PERSIST"]
+    G --> H["OFFER"]
+      </div>
+      <div class="mermaid mermaid-mobile" role="img" aria-label="Flowchart showing the six phases">
 flowchart TD
-    A["Vague Request"] --> B["SCAN\nRead codebase + memory"]
-    B --> C["PREFILL\nConfirm derived facts"]
-    C --> D["INTERVIEW\nBinary questions"]
-    D --> E{"RE-ASSESS\nUpdate full picture"}
-    E -->|"More needed"| D
-    E -->|"Enough data"| F["SYNTHESIZE\nGenerate PLAN.md"]
-    F --> G["PERSIST\nSave session"]
-    G --> H["OFFER\nStart building?"]
+    A["Vague Request"] --> B["SCAN"]
+    B --> C["PREFILL"]
+    C --> D["INTERVIEW"]
+    D --> E{"RE-ASSESS"}
+    E -->|"More"| D
+    E -->|"Done"| F["SYNTHESIZE"]
+    F --> G["PERSIST"]
+    G --> H["OFFER"]
       </div>
     </section>
 

@@ -1,14 +1,15 @@
 # plea
 
-Adaptive clinical interview plugin for Claude Code. One yes/no question at a time, re-assess after every answer, output a concrete `PLAN.md`.
+[![Website](https://img.shields.io/badge/website-plea.dev-blue)](https://plea.dev)
 
-Modeled on differential diagnosis — each question eliminates a branch of the decision tree. Not a script, a diagnosis.
+Adaptive clinical interview plugin for Claude Code. Uses medical diagnosis methods to extract requirements through binary yes/no questions — one at a time, re-assess after every answer, output a concrete `PLAN.md`.
 
-**Website:** [plea.dev](https://plea.dev)
+Not a script, a diagnosis. Each question eliminates a branch of the decision tree.
 
 ## Install
 
 ```bash
+claude plugins add-marketplace sliday/claude-plugins && \
 claude plugins install plea@sliday
 ```
 
@@ -16,12 +17,6 @@ claude plugins install plea@sliday
 
 ```
 /plea:plea I need a REST API for user management
-```
-
-Or with no arguments (will prompt):
-
-```
-/plea:plea
 ```
 
 ## How It Works
@@ -66,14 +61,10 @@ Rooted in proven frameworks:
 - **Kepner-Tregoe** — systematic situation appraisal
 - **Adaptive clinical interview** — protocol is a tree, not a list
 
-## Session Data
-
-Sessions saved to `.plea/sessions/<timestamp>.json`. Contains all questions, answers, and contradictions. Enables resuming interrupted interviews.
-
 ## Files Generated
 
 - `PLAN.md` — execution plan in project root
-- `.plea/sessions/*.json` — interview session data
+- `.plea/sessions/*.json` — interview session data (questions, answers, contradictions)
 - `CLAUDE.local.md` — key decisions appended (with permission)
 
 ## Credits
