@@ -241,12 +241,12 @@
       line-height: 1.7;
     }
 
-    /* Problem section */
+    /* Problem section — timeline comparison */
     .flow-compare {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 16px;
-      margin-top: 24px;
+      gap: 0;
+      margin-top: 32px;
     }
 
     @media (min-width: 640px) {
@@ -255,34 +255,90 @@
       }
     }
 
-    .flow-box {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      padding: 20px;
+    .flow-col {
+      position: relative;
+      padding: 0 0 0 28px;
     }
 
-    .flow-box h3 {
+    @media (min-width: 640px) {
+      .flow-col:first-child {
+        border-right: 1px solid var(--color-border);
+        padding-right: 32px;
+      }
+      .flow-col:last-child {
+        padding-left: 32px;
+      }
+    }
+
+    @media (max-width: 639px) {
+      .flow-col:first-child {
+        padding-bottom: 32px;
+        margin-bottom: 32px;
+        border-bottom: 1px solid var(--color-border);
+      }
+    }
+
+    .flow-col h3 {
       font-family: var(--font-display);
-      font-size: 0.875rem;
+      font-size: 0.6875rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 12px;
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+      margin-left: -28px;
     }
 
-    .flow-box.before h3 { color: #EF4444; }
-    .flow-box.after h3 { color: var(--color-green); }
+    .flow-col.before h3 { color: #EF4444; }
+    .flow-col.after h3 { color: var(--color-green); }
 
-    .flow-box .steps {
+    .flow-step {
+      position: relative;
+      padding: 0 0 20px 0;
       font-size: 0.875rem;
       color: var(--color-text-muted);
-      line-height: 1.8;
+      line-height: 1.5;
     }
 
-    .flow-box .steps .arrow {
-      color: var(--color-border);
-      margin: 0 6px;
+    .flow-step:last-child { padding-bottom: 0; }
+
+    .flow-step::before {
+      content: '';
+      position: absolute;
+      left: -20px;
+      top: 7px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-border);
+    }
+
+    .flow-step::after {
+      content: '';
+      position: absolute;
+      left: -18px;
+      top: 17px;
+      width: 2px;
+      height: calc(100% - 10px);
+      background: var(--color-border);
+    }
+
+    .flow-step:last-child::after { display: none; }
+
+    .before .flow-step.bad::before { background: #EF4444; }
+    .after .flow-step.good::before { background: var(--color-green); }
+
+    .flow-step .label {
+      color: var(--color-text);
+      font-weight: 500;
+    }
+
+    .flow-step code {
+      font-family: var(--font-display);
+      font-size: 0.8125rem;
+      color: var(--color-green);
+      background: var(--color-surface);
+      padding: 1px 5px;
+      border-radius: 3px;
     }
 
     /* Diagram */
@@ -535,29 +591,36 @@
       <h2>One sentence in. Three rewrites later.</h2>
       <p>You describe what you want in a sentence. Claude fills the gaps with assumptions. You correct. It over-corrects. Two more rounds and you've spent more time steering than building.</p>
       <div class="flow-compare">
-        <div class="flow-box before">
+        <div class="flow-col before">
           <h3>Without plea</h3>
-          <div class="steps">
-            "Build me a CLI that syncs files"<br>
-            <span class="arrow">&darr;</span><br>
-            Assumes bidirectional, config file, watch mode<br>
-            <span class="arrow">&darr;</span><br>
-            400 lines you didn't ask for<br>
-            <span class="arrow">&darr;</span><br>
-            Corrections...<br>
-            <span class="arrow">&darr;</span><br>
-            More corrections...
+          <div class="flow-step">
+            <span class="label">"Build me a CLI that syncs files"</span>
+          </div>
+          <div class="flow-step bad">
+            Assumes bidirectional sync, config file, watch mode
+          </div>
+          <div class="flow-step bad">
+            400 lines you didn't ask for
+          </div>
+          <div class="flow-step">
+            You correct. It over-corrects.
+          </div>
+          <div class="flow-step bad">
+            Another round of corrections...
           </div>
         </div>
-        <div class="flow-box after">
+        <div class="flow-col after">
           <h3>With plea</h3>
-          <div class="steps">
-            "Build me a CLI that syncs files"<br>
-            <span class="arrow">&darr;</span><br>
-            12 yes/no questions<br>
-            <span class="arrow">&darr;</span><br>
-            PLAN.md: unidirectional push, 3 files, ~80 lines<br>
-            <span class="arrow">&darr;</span><br>
+          <div class="flow-step">
+            <span class="label">"Build me a CLI that syncs files"</span>
+          </div>
+          <div class="flow-step good">
+            12 yes/no questions
+          </div>
+          <div class="flow-step good">
+            <code>PLAN.md</code> unidirectional push, 3 files, ~80 lines
+          </div>
+          <div class="flow-step good">
             Exactly what you meant
           </div>
         </div>
