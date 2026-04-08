@@ -704,10 +704,38 @@ G --> H["OFFER"]
     <div class="container">
 
 
+    <!-- Why it works -->
+    <section>
+      <h2>Why it works</h2>
+      <p>The problem with AI coding assistants isn't intelligence — it's alignment. You say "build me an API." The agent hears a hundred possible APIs and picks one. Three correction cycles later you're still not talking about the same thing.</p>
+      <p>We looked at fields that have solved this problem already. Doctors don't ask patients to describe their illness in one sentence and then guess the diagnosis. They run a <strong>differential diagnosis</strong>: a structured sequence of binary questions where each answer eliminates half the remaining possibilities. "Does it hurt here? Yes or no." Not "tell me about your pain."</p>
+      <p>The key insight: <strong>binary questions are cheap for the user but expensive in information</strong>. A yes/no answer takes one second to give but can eliminate entire branches of the solution space. And critically — the next question depends on the previous answer. It's a tree, not a list.</p>
+      <p>We tested this on ourselves first. Azamat pitched the idea: "what if we just bombard the user with yes/no questions before any code is written?" We ran a live session — 20 questions about building this very plugin. Three things became clear:</p>
+
+      <div class="principles" style="margin-bottom: 24px;">
+        <div class="principle">
+          <h3>Binary answers are fast</h3>
+          <p>Developers answered in seconds. No friction. No "let me think about that." Yes or no, move on.</p>
+        </div>
+        <div class="principle">
+          <h3>"Or" questions break the flow</h3>
+          <p>"REST or GraphQL?" forces a pause. "Does it need a REST API?" doesn't. If the question feels hard to answer, the question is wrong — decompose it.</p>
+        </div>
+        <div class="principle">
+          <h3>Free text leaks through (and that's good)</h3>
+          <p>3 out of 20 times, the developer typed a sentence instead of yes/no. Every time, it was more valuable than a binary answer. The system accepts it and skips questions that the text already answered.</p>
+        </div>
+      </div>
+
+      <p>The methodology draws from four proven frameworks. <strong>Differential diagnosis</strong> provides the core loop: ask, eliminate, re-assess. <strong>TRIZ</strong> (Altshuller's theory of inventive problem solving, derived from 40,000 patent analyses) contributes contradiction detection — if you say "no database" then "persistent user accounts," those answers conflict and the system flags it before it becomes a bug. <strong>Kepner-Tregoe situation appraisal</strong> provides the structured decomposition of complex situations into binary assessments. <strong>Adaptive clinical interview</strong> ensures the protocol is a tree, not a checklist — each answer reshapes the remaining questions.</p>
+      <p>The result: developers reach a concrete, executable plan in under 3 minutes. The plan is specific enough that Claude Code can execute it without further clarification in most cases. And zero questions are asked that could have been derived from the codebase.</p>
+    </section>
+
+
     <!-- Clinical method -->
     <section>
       <h2>It's a decision tree, not a questionnaire.</h2>
-      <p>Modeled on differential diagnosis. Each question eliminates a branch of the decision tree. The protocol is a tree, not a list.</p>
+      <p>Every answer visibly reshapes the interview. Questions are added, removed, or reprioritized in real time.</p>
       <div class="principles">
         <div class="principle">
           <h3>Binary only</h3>
