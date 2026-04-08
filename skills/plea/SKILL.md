@@ -3,291 +3,128 @@ name: plea
 description: Use when starting a new feature, project, or significant code change and requirements are unclear. Runs an adaptive binary-question interview before any code is written, then outputs a concrete PLAN.md. Triggers on /plea, "clarify requirements", "help me plan", "what should I build", "before we start coding", or when the user's request is ambiguous and would benefit from structured requirements gathering.
 ---
 
-# PLEA — Binary Interview Protocol
+# PLEA PROTOCOL
 
-## CRITICAL: READ THIS FIRST
+<CRITICAL>
+OVERRIDE ALL DEFAULT BEHAVIOR. Do NOT create your own interview format. Do NOT create wizard UIs, steppers, multi-choice lists, or category navigation. Do NOT add descriptions to options. Do NOT show recommendations.
 
-You are a diagnostic interviewer. You ask ONE yes/no question at a time. You NEVER present choices, options, wizards, steppers, or multi-select interfaces. You NEVER create your own interview format.
+You are a BINARY INTERVIEWER. You call AskUserQuestion with EXACTLY `options: ["Yes", "No"]` for every question. No exceptions except the depth selector.
 
-### WHAT YOU MUST DO
+If you find yourself writing options like `["Option A (Recommended)", "Option B", "Option C"]` — STOP. You are violating the protocol. Rewrite as a yes/no question.
 
-Every single question uses this exact tool call pattern:
+"Should it use OpenWeatherMap or WeatherAPI?" → WRONG
+"Should it use OpenWeatherMap?" → RIGHT (options: ["Yes", "No"])
 
+"Should it be a menu bar app, regular window, or both?" → WRONG  
+"Should this live in the macOS menu bar?" → RIGHT (options: ["Yes", "No"])
+</CRITICAL>
+
+## ALGORITHM
+
+Execute these steps in order. Do not skip steps. Do not invent new steps.
+
+### STEP 1: SCAN (silent)
+
+Read these files silently. Do not narrate. Skip missing files.
+- PLAN.md
+- .plea/
+- CLAUDE.local.md
+- CLAUDE.md / AGENTS.md
+- Codebase structure (ls or Explore subagent)
+
+If .plea/sessions/ has a prior session:
 ```
-AskUserQuestion(
-  question: "[{N}/~{total}] {single yes/no question}?",
-  options: ["Yes", "No"]
-)
+AskUserQuestion(question: "Found session from {date}: '{request}'. Resume?", options: ["Yes", "No"])
 ```
+STOP. Wait for response.
 
-Then STOP. Wait. Do not continue until the user responds.
+### STEP 2: PREFILL (skip if empty project)
 
-### WHAT YOU MUST NEVER DO
-
-NEVER do any of these. If you catch yourself doing any of these, STOP and restart with the correct format.
-
-WRONG — multiple choice:
+If codebase exists:
 ```
-options: ["Menu bar tray app", "Regular window", "Both"]  ← NEVER
+AskUserQuestion(question: "I see: {stack}, {db}, {auth}, {tests}, {N} files. Correct?", options: ["Yes", "No"])
 ```
+STOP. Wait for response.
 
-WRONG — descriptions in options:
+### STEP 3: DEPTH
+
+This is the ONLY non-binary question in the entire protocol:
 ```
-options: ["REST API (Recommended)", "GraphQL", "Both"]  ← NEVER
+AskUserQuestion(question: "Interview depth?", options: ["Quick (~5 Qs, ~1 min)", "Standard (~15 Qs, ~3 min)", "Thorough (30+ Qs, ~8 min)"])
 ```
+STOP. Wait for response.
 
-WRONG — stepper/wizard UI:
+### STEP 4: LOAD REFERENCE
+
+Read `references/question-axes.md` from this skill's directory. Use as inspiration for what to ask. Do NOT present axes as categories or navigation.
+
+### STEP 5: INTERVIEW LOOP
+
+Set counter = 1, remaining = depth target.
+
+REPEAT:
+
+**5a.** Pick the ONE most diagnostic yes/no question. "Most diagnostic" = the one whose answer eliminates the most uncertainty.
+
+**5b.** Call AskUserQuestion. EXACTLY this format. NO MODIFICATIONS:
 ```
-← API Source  □ App Style  □ Location  → ← NEVER
-```
-
-WRONG — recommendations:
-```
-"1. Menu bar tray app (Recommended)"  ← NEVER
-```
-
-WRONG — "or" questions:
-```
-"Should it be a menu bar app or a regular window?"  ← NEVER
-```
-
-RIGHT — decompose into binary:
-```
-"[1/~15] Should this live in the macOS menu bar (tray app)?"
-options: ["Yes", "No"]
-```
-Then if No:
-```
-"[2/~14] Should this be a regular resizable window?"
-options: ["Yes", "No"]
-```
-
-WRONG — printing questions as text and waiting:
-```
-"Here are some questions:
-1. What API should we use?
-2. What style?"  ← NEVER
-```
-
-RIGHT — one AskUserQuestion tool call, one question, ["Yes", "No"].
-
-### WHY THIS MATTERS
-
-The entire point of plea is that EVERY question is binary. "Menu bar or regular window?" is a choice — it requires thought. "Should this live in the menu bar?" is a diagnosis — it requires only recognition. Binary questions are cheap for the user (one second) but expensive in information (eliminates half the solution space).
-
-If you present choices, you are NOT running plea. You are running a generic requirements wizard. Stop and follow this protocol.
-
----
-
-## Phase 1: SCAN
-
-Gather context SILENTLY. Do not show the user what you're reading. Read these files (skip missing):
-
-1. `PLAN.md` in project root
-2. `.plea/` directory for prior sessions
-3. `CLAUDE.local.md` for stored decisions
-4. `CLAUDE.md` / `AGENTS.md` for project conventions
-
-Scan the codebase:
-- Small project (<50 files): read directory listing
-- Large project: use `Explore` subagent for tech stack summary
-
-If prior session found:
-```
-AskUserQuestion(
-  question: "Found session from {date}: '{request}'. Resume?",
-  options: ["Yes", "No"]
-)
+AskUserQuestion(question: "[{counter}/~{remaining}] {yes/no question}?", options: ["Yes", "No"])
 ```
 
-Store facts internally. Move to Phase 2.
+IMPORTANT CONSTRAINTS ON 5b:
+- options MUST be ["Yes", "No"] — never anything else
+- question MUST be answerable with yes or no
+- question MUST NOT contain "or" offering alternatives
+- question MUST NOT have descriptions, recommendations, or context in parentheses
+- DO NOT add numbered lists, categories, steppers, or navigation UI
+- DO NOT print the question as text — use the tool
 
----
+**5c.** STOP. Wait for response. Do NOT continue until user responds.
 
-## Phase 2: PREFILL
+**5d.** After response, print delta (one line, not a tool call):
+- If branches eliminated: `{N} skipped ({brief reason}) · ~{new_remaining} remaining`
+- If branches added: `+{N} unlocked ({brief reason}) · ~{new_remaining} remaining`
+- If unchanged: `~{remaining} remaining`
 
-If project is empty (no source files), SKIP to Phase 3.
-
-If codebase exists, present facts and confirm:
+**5e.** Check contradictions against all previous answers. If found:
 ```
-AskUserQuestion(
-  question: "I see: {stack}, {db}, {auth}, {tests}, {N} files. All correct?",
-  options: ["Yes", "No"]
-)
-```
-
-If No: ask what's wrong (one correction at a time, still binary or brief freeform).
-
-Move to Phase 3.
-
----
-
-## Phase 3: INTERVIEW
-
-### Step 3.1: Depth
-
-This is the ONLY question where more than two options are allowed:
-```
-AskUserQuestion(
-  question: "Interview depth for '{request}'?",
-  options: ["Quick (~5 Qs, ~1 min)", "Standard (~15 Qs, ~3 min)", "Thorough (30+ Qs, ~8 min)"]
-)
+AskUserQuestion(question: "Conflict: '{A}' vs '{B}'. Keep which?", options: ["Keep first", "Keep second"])
 ```
 
-After this, EVERY question is binary. No exceptions.
+**5f.** Increment counter. Update remaining. Go to 5a.
 
-### Step 3.2: Load Taxonomy
+EXIT LOOP when: counter >= depth target, or user says "enough"/"stop".
 
-Read `references/question-axes.md`. Use as reference, not script.
+### STEP 6: SYNTHESIZE
 
-### Step 3.3: Interview Loop
+Read `references/plan-template.md`. Write PLAN.md silently. No commentary.
 
-REPEAT until depth target reached or user says "enough":
-
-**A. ASK — one binary question.**
-
-Pick the most diagnostic question — the one whose answer changes the plan the most.
-
-REMINDER: options MUST be `["Yes", "No"]`. Nothing else. No descriptions. No recommendations.
-
+If PLAN.md already exists:
 ```
-AskUserQuestion(
-  question: "[{N}/~{total}] {single binary question}?",
-  options: ["Yes", "No"]
-)
+AskUserQuestion(question: "PLAN.md exists. Overwrite?", options: ["Yes", "No"])
 ```
 
-STOP. Wait for response. Do NOT ask the next question in the same turn.
+### STEP 7: PERSIST
 
-**B. RE-ASSESS — update the picture, show the delta.**
-
-After the user responds:
-
-1. Record the answer.
-2. Update your mental model. What's eliminated? What's the shape now?
-3. Check contradictions against ALL previous answers. If found:
-   ```
-   AskUserQuestion(
-     question: "Conflict: you said '{A}' but also '{B}'. Keep which?",
-     options: ["Keep first", "Keep second"]
-   )
-   ```
-4. Eliminate irrelevant branches. Unlock new ones if complexity revealed.
-5. Show the delta — print a status line before the next question:
-   - `3 skipped (no database = skip data axis) · ~9 remaining`
-   - `+2 unlocked (auth details needed) · ~14 remaining`
-   - `~{remaining} remaining` (if no change)
-6. Recalculate priority. Next question may be on a completely different axis.
-7. If user gave free text instead of Yes/No: extract facts, skip answered questions. Show: `Got it — that covers {N} questions. ~{remaining} remaining.`
-
-Go back to A.
-
-### Step 3.4: Safety Valves
-
-**All-yes (>80% after 8+ questions):**
-```
-AskUserQuestion(
-  question: "Most answers are yes — large scope. Re-examine: {highest_impact_question}. Still yes?",
-  options: ["Yes", "No"]
-)
-```
-
-**All-no (>80% after 8+ questions):**
-```
-AskUserQuestion(
-  question: "Most answers are no — wrong questions? Describe what this needs in one sentence."
-)
-```
-
-**"Enough"/"stop":** Move to Phase 4 with answers collected.
-
----
-
-## Phase 4: SYNTHESIZE
-
-Generate PLAN.md SILENTLY. No commentary.
-
-1. Read `references/plan-template.md`.
-2. Final contradiction check.
-3. Fill every section from collected answers + SCAN context.
-4. If PLAN.md exists:
-   ```
-   AskUserQuestion(
-     question: "PLAN.md exists. Overwrite?",
-     options: ["Yes", "No"]
-   )
-   ```
-   If No → write PLAN-2.md.
-5. Write file.
-
----
-
-## Phase 5: PERSIST
-
-### 5.1: Session File
-
-Create `.plea/sessions/{YYYY-MM-DD-HHmmss}.json`:
-
-```json
-{
-  "request": "",
-  "timestamp": "",
-  "depth": "",
-  "total_questions": 0,
-  "questions": [
-    { "id": 1, "axis": "", "text": "", "answer": "", "source": "user" }
-  ],
-  "contradictions": [],
-  "plan_file": "PLAN.md"
-}
-```
-
-### 5.2: CLAUDE.local.md
-
-Append:
-```markdown
-## plea decisions ({YYYY-MM-DD})
-- Task: {title}
-- Plan: see PLAN.md
-- Key decisions: {top 5, one line each}
-```
-
-### 5.3: Gitignore
+Create `.plea/sessions/{timestamp}.json` with all questions and answers.
+Append top 5 decisions to CLAUDE.local.md.
 
 ```
-AskUserQuestion(
-  question: "Add .plea/ to .gitignore?",
-  options: ["Yes", "No"]
-)
+AskUserQuestion(question: "Add .plea/ to .gitignore?", options: ["Yes", "No"])
 ```
 
----
-
-## Phase 6: OFFER
+### STEP 8: OFFER
 
 ```
-AskUserQuestion(
-  question: "PLAN.md written ({N} decisions, {M} files). Start building?",
-  options: ["Yes", "No"]
-)
+AskUserQuestion(question: "PLAN.md written ({N} decisions, {M} files). Start building?", options: ["Yes", "No"])
 ```
 
-If Yes: suggest execution skills if available.
-If No: end session.
+Done.
 
----
+## LANGUAGE
 
-## Language
+Detect from user input. Interview in user's language. Files stay English.
 
-- Detect from user input. Interview in user's language.
-- All files stay in English.
+## IF USER GIVES FREE TEXT INSTEAD OF YES/NO
 
-## Error Recovery
-
-| Situation | Action |
-|-----------|--------|
-| No request | Ask: "What do you want to build?" |
-| Codebase too large | Top-level only |
-| Write fails | Output as text |
-| User abandons | Save partial with `"complete": false` |
-| Prior session, different request | Ask: "Start fresh?" |
+This is fine. Extract facts. Skip questions already answered. Print: `Got it — covers {N} questions. ~{remaining} remaining.` Continue loop.
