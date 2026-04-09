@@ -54,13 +54,27 @@ AskUserQuestion(question: "Interview depth?", options: ["Quick (~5 Qs, ~1 min)",
 ```
 STOP. Wait for response.
 
+**DEPTH IS A SENSITIVITY DIAL, NOT A CAP.**
+
+Depth controls how readily you add new questions when branches open — NOT a hard limit on total questions.
+
+| Depth | Starting target | Add new questions when... |
+|-------|----------------|--------------------------|
+| Quick | ~5 | A critical blocker or contradiction is discovered. High threshold — only ask what's absolutely necessary. |
+| Standard | ~15 | Complexity is discovered in any axis. Moderate threshold — explore important branches. |
+| Thorough | 30+ | Any branch opens. Low threshold — proactively explore all axes in depth. |
+
+ALL depths can grow beyond their starting target. A "Quick" interview that discovers the user needs auth + real-time + offline will add questions for those axes — it doesn't stop at 5 and produce an incomplete plan. The difference: Quick only adds questions for critical unknowns, Thorough adds them for nice-to-know details too.
+
+The `~remaining` counter reflects this. It goes up when branches open, down when they close. Show the delta so the user sees WHY.
+
 ### STEP 4: LOAD REFERENCE
 
 Read `references/question-axes.md` from this skill's directory. Use as inspiration for what to ask. Do NOT present axes as categories or navigation.
 
 ### STEP 5: INTERVIEW LOOP
 
-Set counter = 1, remaining = depth target.
+Set counter = 1, remaining = starting target from depth selection.
 
 REPEAT:
 

@@ -1,11 +1,11 @@
 ---
-description: Thorough 30+ question interview for complex architecture decisions, then generate PLAN.md
+description: Thorough interview starting at 30+ questions — proactively explores all branches
 argument-hint: <describe what you want to build>
 ---
 
 Invoke the @plea:plea skill and follow it exactly as presented to you.
 
-IMPORTANT: Skip the depth selection step. Force depth to Thorough (30+ questions, ~8 min). Do NOT ask the user to choose depth — go straight to the interview loop with a target of 30+ questions.
+IMPORTANT: Skip the depth selection step. Force depth to Thorough. Start with 30+ questions and proactively explore ALL axes in depth. Thorough means low threshold for adding — ask about nice-to-know details, edge cases, and non-functional requirements.
 
 The user's request is: $ARGUMENTS
 
