@@ -570,8 +570,8 @@
     <div class="brand">plea<span>.</span>dev</div>
     <h1>Diagnose before you build.</h1>
     <p>Claude Code plugin. Medical-grade requirements gathering through binary yes/no questions. One question, re-assess, repeat. Output: a concrete PLAN.md.</p>
-    <div class="install-block" onclick="copyCmd(this,'claude plugins add-marketplace sliday/claude-plugins && claude plugins install plea@sliday')" onkeydown="if(event.key==='Enter')copyCmd(this,'claude plugins add-marketplace sliday/claude-plugins && claude plugins install plea@sliday')" role="button" tabindex="0" aria-label="Copy install command">
-      claude plugins add-marketplace sliday/claude-plugins &&<br>claude plugins install plea@sliday
+    <div class="install-block" onclick="copyCmd(this,'claude plugins marketplace add sliday/claude-plugins && claude plugins install plea@sliday')" onkeydown="if(event.key==='Enter')copyCmd(this,'claude plugins marketplace add sliday/claude-plugins && claude plugins install plea@sliday')" role="button" tabindex="0" aria-label="Copy install command">
+      claude plugins marketplace add sliday/claude-plugins &&<br>claude plugins install plea@sliday
       <span class="copy-hint">click to copy</span>
     </div>
     <a href="https://github.com/sliday/plea" class="github-stars" aria-label="Star plea on GitHub">
@@ -669,7 +669,7 @@
     <section class="diagram-section">
       <div class="container">
         <h2>How it works</h2>
-        <p>Six phases. The interview loop is the engine.</p>
+        <p>Eight steps. The interview loop with re-assessment is the engine.</p>
       </div>
       <div class="diagram-wide">
         <div id="diagram" class="mermaid" role="img" aria-label="Flowchart: SCAN, PREFILL, INTERVIEW with RE-ASSESS loop, SYNTHESIZE, PERSIST, OFFER"></div>
@@ -779,8 +779,8 @@
   <!-- Footer -->
   <footer>
     <div class="container">
-      <div class="install-block" onclick="copyCmd(this,'claude plugins add-marketplace sliday/claude-plugins && claude plugins install plea@sliday')" onkeydown="if(event.key==='Enter')copyCmd(this,'claude plugins add-marketplace sliday/claude-plugins && claude plugins install plea@sliday')" role="button" tabindex="0" aria-label="Copy install command">
-        claude plugins add-marketplace sliday/claude-plugins &&<br>claude plugins install plea@sliday
+      <div class="install-block" onclick="copyCmd(this,'claude plugins marketplace add sliday/claude-plugins && claude plugins install plea@sliday')" onkeydown="if(event.key==='Enter')copyCmd(this,'claude plugins marketplace add sliday/claude-plugins && claude plugins install plea@sliday')" role="button" tabindex="0" aria-label="Copy install command">
+        claude plugins marketplace add sliday/claude-plugins &&<br>claude plugins install plea@sliday
         <span class="copy-hint">click to copy</span>
       </div>
       <div class="footer-links">
@@ -801,10 +801,12 @@
       var chart = 'flowchart ' + dir + '\n' +
         'A["Vague Request"] --> B["SCAN"]\n' +
         'B --> C["PREFILL"]\n' +
-        'C --> D["INTERVIEW"]\n' +
+        'C --> X["DEPTH"]\n' +
+        'X --> D["INTERVIEW"]\n' +
         'D --> E{"RE-ASSESS"}\n' +
         'E -->|"More"| D\n' +
-        'E -->|"Done"| F["SYNTHESIZE"]\n' +
+        'E -->|"Done"| K["FINAL CHECK"]\n' +
+        'K --> F["SYNTHESIZE"]\n' +
         'F --> G["PERSIST"]\n' +
         'G --> H["OFFER"]';
       document.getElementById('diagram').textContent = chart;

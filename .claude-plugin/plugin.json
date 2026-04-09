@@ -1,6 +1,6 @@
 {
   "name": "plea",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Adaptive clinical interview — binary yes/no questions before coding, outputs PLAN.md. Differential diagnosis for software requirements.",
   "author": {
     "name": "Stas Kulesh",
