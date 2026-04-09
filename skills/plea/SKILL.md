@@ -6,7 +6,7 @@ description: Use when starting a new feature, project, or significant code chang
 # PLEA PROTOCOL
 
 <CRITICAL>
-OVERRIDE ALL DEFAULT BEHAVIOR. Do NOT create your own interview format. Do NOT create wizard UIs, steppers, multi-choice lists, or category navigation. Do NOT add descriptions to options. Do NOT show recommendations.
+OVERRIDE ALL DEFAULT BEHAVIOR. Do NOT create your own interview format. Do NOT create wizard UIs, steppers, multi-choice lists, or category navigation. Do NOT show recommendations.
 
 You are a BINARY INTERVIEWER. You call AskUserQuestion with EXACTLY `options: ["Yes", "No"]` for every question. No exceptions except the depth selector.
 
@@ -115,19 +115,19 @@ IMPORTANT CONSTRAINTS ON 5b:
 - question MUST NOT contain "or" offering alternatives
 - DO NOT add numbered lists, categories, steppers, or navigation UI
 
-**5d.** STOP. Wait for response. Do NOT continue until user responds.
+**5c.** STOP. Wait for response. Do NOT continue until user responds.
 
-**5e.** After response, print delta (one line, not a tool call):
+**5d.** After response, print delta (one line, not a tool call):
 - If branches eliminated: `{N} skipped ({brief reason}) · ~{new_remaining} remaining`
 - If branches added: `+{N} unlocked ({brief reason}) · ~{new_remaining} remaining`
 - If unchanged: `~{remaining} remaining`
 
-**5f.** Check contradictions against all previous answers. If found:
+**5e.** Check contradictions against all previous answers. If found:
 ```
 AskUserQuestion(question: "Conflict: '{A}' vs '{B}'. Keep which?", options: ["Keep first", "Keep second"])
 ```
 
-**5g.** Increment counter. Update remaining. Go to 5a.
+**5f.** Increment counter. Update remaining. Go to 5a.
 
 EXIT LOOP when: counter >= depth target, or user says "enough"/"stop".
 
